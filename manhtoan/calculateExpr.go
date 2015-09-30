@@ -53,15 +53,8 @@ func isIdent(str string) bool {
 	return false
 }
 
-func main() {
-	var str string = "1 + 2 * 3 * ( 4 - 2 ) + adadd / B + C"
-	// fmt.Print("Please input expression: ")
-	// scanner := bufio.NewScanner(strings.NewReader(str))
-	// scanner.Scan()
+func printToken(str string) {
 
-	// fmt.Println(str)
-
-	//i := 0
 	for i := 0; i < len(str); i++ {
 		var tmp string
 		count := 0
@@ -94,7 +87,7 @@ func main() {
 		}
 
 		// Print token
-		switch isTOKEN(string(tmp)) {
+		switch isTOKEN(tmp) {
 		case INLIT:
 			fmt.Println("INLIT", tmp)
 		case _OPERATOR:
@@ -111,5 +104,16 @@ func main() {
 			i += count - 1
 		}
 	}
+
+}
+
+func main() {
+	var str string = "1 + 2 * 3 * ( 4 - 2 ) + adadd / B + C"
+	// fmt.Print("Please input expression: ")
+	// scanner := bufio.NewScanner(strings.NewReader(str))
+	// scanner.Scan()
+
+	// Print token lexer
+	printToken(str)
 
 }
