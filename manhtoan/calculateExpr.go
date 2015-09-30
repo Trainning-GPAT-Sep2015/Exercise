@@ -17,11 +17,11 @@ const (
 	PARENTHESIS
 )
 
-var IN_LIT = regexp.MustCompile("[0-9]+")
+var IN_LIT = regexp.MustCompile(`[0-9]+`)
 
 var OPERATOR = regexp.MustCompile(`\+|-|/|\*`)
 
-var IDENT = regexp.MustCompile("[a-zA-Z0-9]+")
+var IDENT = regexp.MustCompile(`[a-zA-Z]+`)
 
 var SEPARATOR = regexp.MustCompile(`(|)`)
 
@@ -46,8 +46,15 @@ func isSingleNumber(str string) bool {
 	return false
 }
 
+func isIdent(str string) bool {
+	if IDENT.MatchString(str) {
+		return true
+	}
+	return false
+}
+
 func main() {
-	var str string = "1 + 2 * 3 * ( 4 - 2 ) + Aad / B + C"
+	var str string = "1 + 2 * 3 * ( 4 - 2 ) + adadd / B + C"
 	// fmt.Print("Please input expression: ")
 	// scanner := bufio.NewScanner(strings.NewReader(str))
 	// scanner.Scan()
@@ -65,9 +72,18 @@ func main() {
 			continue
 		}
 
+		// Implement for number have length > 1
 		if isSingleNumber(string(str[i])) {
 			for j := i; j < len(str); j++ {
 				if !isSingleNumber(string(str[j])) {
+					break
+				}
+				tmp += string(str[j])
+				count++
+			}
+		} else if isIdent(string(str[i])) { // Implement for Ident have length > 1
+			for j := i; j < len(str); j++ {
+				if !isIdent(string(str[j])) {
 					break
 				}
 				tmp += string(str[j])
