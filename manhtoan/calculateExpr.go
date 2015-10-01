@@ -4,6 +4,7 @@ import (
 	//	"bufio"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -249,7 +250,7 @@ func calculateOperator(op string, operand1, operand2 int) int {
 	}
 }
 
-func convertToPostFix(_infix string) string {
+func convertToPostFix(_infix string) (string, bool) {
 	var infix string
 
 	// Skip space in infix string
@@ -271,7 +272,7 @@ func convertToPostFix(_infix string) string {
 			} else if string(infix[i]) == "(" { // Left Parenthesis
 				myStack.Push(string(infix[i]))
 			} else if string(infix[i]) == ")" { // Right Parenthesis
-				for !myStack.isEmpty() && string(infix[i]) != "(" {
+				for !myStack.isEmpty() && myStack.Top() != "(" {
 					postfix += " "
 					postfix += myStack.Top()
 					myStack.Pop()
@@ -280,7 +281,9 @@ func convertToPostFix(_infix string) string {
 			}
 			switch isTOKEN(string(infix[i])) {
 			case _OPERATOR:
-				if string(infix[i]) == "-" && OPERATOR.MatchString(string(infix[i-1])) {
+				if string(infix[i]) == "/" && string(infix[i+1]) == "0" {
+					return postfix, false
+				} else if string(infix[i]) == "-" && OPERATOR.MatchString(string(infix[i-1])) {
 					postfix += string(infix[i])
 				} else {
 					postfix += " "
@@ -300,6 +303,8 @@ func convertToPostFix(_infix string) string {
 						}
 					}
 				}
+			case _IDENT:
+				postfix += string(infix[i])
 			case INLIT:
 				postfix += string(infix[i])
 			}
@@ -310,30 +315,103 @@ func convertToPostFix(_infix string) string {
 		postfix += myStack.Top()
 		myStack.Pop()
 	}
-	return postfix
+	postfix += " "
+	return postfix, true
 }
 
-func evaluatePostfix(postfix string) int {
+func evaluatePostfix(postfix string, variable map[string]int) (int, bool) {
 	myIntStack := new(intStack)
+	var result int
 	for i := 0; i < len(postfix); i++ {
 		if string(postfix[i]) == " " {
 			continue
 		} else if IN_LIT.MatchString(string(postfix[i])) {
-
+			var operand int
+			for i < len(postfix) && IN_LIT.MatchString(string(postfix[i])) {
+				temp, _ := strconv.Atoi(string(postfix[i]))
+				operand = (operand * 10) + temp
+				i++
+			}
+			i--
+			//Push to intStack
+			myIntStack.Push(operand)
 		} else if OPERATOR.MatchString(string(postfix[i])) {
+			if IN_LIT.MatchString(string(postfix[i+1])) {
+				i++
+				operand := 0
+				for i < len(postfix) && IN_LIT.MatchString(string(postfix[i])) {
+					temp, _ := strconv.Atoi(string(postfix[i]))
+					operand = (operand * 10) + temp
+					i++
+				}
+				i--
 
+				operand = operand * (-1)
+				//Push operand to stack
+				myIntStack.Push(operand)
+			} else {
+				operand2 := myIntStack.Top()
+				myIntStack.Pop()
+
+				operand1 := myIntStack.Top()
+				myIntStack.Pop()
+
+				result = calculateOperator(string(postfix[i]), operand1, operand2)
+
+				myIntStack.Push(result)
+			}
+		} else if IDENT.MatchString(string(postfix[i])) {
+			var temp string
+			for i < len(postfix) && IDENT.MatchString(string(postfix[i])) {
+				temp += string(postfix[i])
+				i++
+			}
+			i--
+			if value, ok := variable[temp]; ok {
+				myIntStack.Push(value)
+			} else {
+				return i - len(temp) + 1, false
+			}
 		}
 	}
+	return myIntStack.Top(), true
 }
 
 func main() {
-	var infix string = "-1 * -212 + 4 / -4 + 3"
-	var postfix string
+	var infix string = "1 + 2 * 3 * ( 4 - 2 ) + Ab / B + C"
+
+	variable := make(map[string]int)
+	variable["Abc"] = 3
+	variable["B"] = 4
+	variable["C"] = 2
+
 	// Print token lexer
 	lexerChecking(infix)
 
-	// Convert to postfix
-	postfix = convertToPostFix(infix)
-	fmt.Println(postfix)
+	fmt.Println()
+	fmt.Println("Infix: ", infix)
+	fmt.Println()
 
+	// Convert to postfix
+	postfix, err := convertToPostFix(infix)
+	fmt.Println("Postfix: ", postfix)
+	fmt.Println()
+
+	// Result
+	if err {
+		result, flag := evaluatePostfix(postfix, variable)
+		if flag {
+			fmt.Println("Result: ", result)
+		} else {
+			var temp string
+			i := result
+			for i < len(postfix) && IDENT.MatchString(string(postfix[i])) {
+				temp += string(postfix[i])
+				i++
+			}
+			fmt.Println("Variable is not declared: ", temp)
+		}
+	} else {
+		fmt.Println("Error divide by zero")
+	}
 }
