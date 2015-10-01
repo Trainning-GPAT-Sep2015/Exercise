@@ -1,0 +1,21 @@
+<component name="libraryTable">
+  <library name="GOPATH &lt;GoWeek1&gt;">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../GoBeginner" />
+      <root url="file://$PROJECT_DIR$/../ToDoList" />
+      <root url="file://$PROJECT_DIR$/../github.com" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <excluded>
+      <root url="file://$PROJECT_DIR$/../github.com/gorilla/mux/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/tools/godep/Godeps/_workspace" />
+      <root url="file://$PROJECT_DIR$/../ToDoList/Godeps/_workspace" />
+      <root url="file://$PROJECT_DIR$/../GoBeginner/.idea" />
+      <root url="file://$PROJECT_DIR$/../github.com/tools/godep/.git" />
+      <root url="file://$PROJECT_DIR$/../ToDoList/.idea" />
+      <root url="file://$PROJECT_DIR$/../github.com/gorilla/context/.git" />
+      <root url="file://$PROJECT_DIR$" />
+    </excluded>
+  </library>
+</component>
