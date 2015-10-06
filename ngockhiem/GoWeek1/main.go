@@ -94,19 +94,19 @@ func Postfix(tokenList []Token) (output []Token) {
 	stack := []Token{}
 	_ = stack
 	for _, t := range tokenList {
-		switch reflect.TypeOf(t).Name() {
-		case "IntToken":
+		switch t.(type) {
+		case IntToken:
 			output = append(output, t)
 //			fmt.Println("IntToken ",stack, output)
-		case "OperatorToken":
+		case OperatorToken:
 			if len(stack) == 0 {
 				stack = append(stack, t)
-			} else if reflect.TypeOf(stack[len(stack) - 1]).Name() == "BracketToken" {
+			} else if _, ok := stack[len(stack) - 1].(BracketToken); ok {
 				// Neu dinh stack la ( thi push vao`
 				stack = append(stack, t)
 			} else {
 				// pop ra toi khi gap op nho hon hoac gap (
-				lower := IsLower(reflect.ValueOf(stack[len(stack) - 1]).Interface().(OperatorToken), reflect.ValueOf(t).Interface().(OperatorToken))
+				lower := IsLower(stack[len(stack) - 1].(OperatorToken), reflect.ValueOf(t).Interface().(OperatorToken))
 				for ; len(stack) > 0 && !lower; {
 					output = append(output, stack[len(stack) - 1])
 					stack = stack[:len(stack) - 1]
@@ -118,10 +118,10 @@ func Postfix(tokenList []Token) (output []Token) {
 				stack = append(stack, t)
 			}
 //			fmt.Println("OPToken ",stack, output)
-		case "VariableToken":
+		case VariableToken:
 			output = append(output, t)
 //			fmt.Println("VarToken ",stack, output)
-		case "BracketToken":
+		case BracketToken:
 			bracket := reflect.ValueOf(t).FieldByName("bracket").String()
 			if bracket == "(" {
 				stack = append(stack, t)
@@ -199,7 +199,7 @@ func CalcExpr(postfix []Token , vars map[string]int) Token {
 }
 
 func main() {
-	var expr string = "2/0"
+	var expr string = "321-987"
 	expr = strings.Replace(expr, " ", "", -1)
 	fmt.Println("Expr : ",expr)
 	a := GenerateToken(expr)
