@@ -16,16 +16,17 @@ func main() {
 		{0, 0, 0, 5, 0, 4, 2, 0, 7},
 		{6, 0, 0, 0, 8, 0, 0, 3, 0},
 		{0, 5, 0, 7, 0, 0, 9, 0, 0}}
+	_ = input
 	var input2 = [9][9]int{
+		{8, 0, 0, 0, 0, 1, 0, 0, 0},
 		{0, 0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 7, 0, 0, 0, 5, 0},
+		{0, 5, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 9, 0, 0, 0},
 		{0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0}}
+		{9, 0, 7, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 8, 0, 0, 3, 2, 0},
+		{2, 0, 0, 0, 0, 0, 0, 0, 0}}
 	_ = input2
 	var output = [9][9]int{
 		{3, 7, 8, 1, 4, 5, 6, 2, 9},
@@ -40,16 +41,20 @@ func main() {
 
 	// Init the input sudoku
 	board := sudoku.InitSudoku(input)
-
+	_ = board
 	// Init the solution sudoku
 	solution := sudoku.InitSudoku(output)
 	_ = solution
-	// Starting the Algorithm
-	sudoku.ScanBoard(&board)
+	fmt.Println(board)
+
 	var solution_list []sudoku.Sudoku
 	sudoku.GetSolutions(&board, &solution_list)
-	for _, s := range solution_list {
-		fmt.Println(s)
-	}
+	fmt.Println(sudoku.CheckSingle(&board))
+	var generate = sudoku.GenerateSudoku()
+	var sol_num, _ = sudoku.CheckSingle(&generate)
+	fmt.Println("Sudoku generated with number of solution:", sol_num, "unassign block: ", sudoku.CountEmptyBlockWithMultiVal(generate))
+	fmt.Println(generate)
 
+	sudoku.BacktrackSolve(&generate)
+	fmt.Println(generate)
 }

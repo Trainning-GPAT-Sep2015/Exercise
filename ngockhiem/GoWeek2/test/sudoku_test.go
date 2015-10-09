@@ -77,14 +77,6 @@ func TestUnique(t *testing.T) {
 	}
 }
 
-func BenchmarkUnique(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		sample := sudoku.Block{Val: 0, Possible: []int{6, 9, 8, 7, 1}}
-		have := []int{5, 6, 9, 8}
-		sample.Unique(have)
-	}
-}
-
 func TestScanRow(t *testing.T) {
 	sample_sudoku := sudoku.InitSudoku(sample_board)
 	expect := [9][]int{[]int{7, 8, 1, 2}, []int{1, 6, 2, 3}, []int{5, 9}, []int{8, 4, 6}, []int{6, 1, 7, 9}, []int{9, 3}, []int{5, 4, 2, 7}, []int{6, 8, 3}, []int{5, 7, 9}}
@@ -239,5 +231,19 @@ func BenchmarkGetSolutions(b *testing.B) {
 		var solution_list []sudoku.Sudoku
 		sample_sudoku := sudoku.InitSudoku(sample_board)
 		sudoku.GetSolutions(&sample_sudoku, &solution_list)
+	}
+}
+
+func BenchmarkUnique(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		sample := sudoku.Block{Val: 0, Possible: []int{6, 9, 8, 7, 1}}
+		have := []int{5, 6, 9, 8}
+		sample.Unique(have)
+	}
+}
+
+func BenchmarkGenerate(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		sudoku.GenerateSudoku()
 	}
 }

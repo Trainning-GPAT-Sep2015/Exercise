@@ -82,6 +82,33 @@ func CanWriteBlock(block, value int, sudoku Sudoku) bool {
 	return true
 }
 
+func ValidValue(block int, sudoku Sudoku) []int {
+	valid := []int{}
+	tmp := sudoku
+	row, col := block/9, block%9
+	rec := 3*(row/3) + (col / 3)
+	if tmp[row][col].Val != 0 {
+		return valid
+	}
+	RowHave := ScanRow(&tmp, row)
+	ColHave := ScanCol(&tmp, col)
+	RecHave := ScanRec(&tmp, rec)
+	not_valid := append(append(RecHave, RowHave...), ColHave...)
+	for i := 1; i < 10; i++ {
+		valid_flag := true
+		for _, iv := range not_valid {
+			if iv == i {
+				valid_flag = false
+				break
+			}
+		}
+		if valid_flag {
+			valid = append(valid, i)
+		}
+	}
+	return valid
+}
+
 // remove all element in Block that appear in b
 func (this *Block) Unique(b []int) {
 	for _, vb := range b {
@@ -102,11 +129,6 @@ func (this *Block) WriteBlock(value int) {
 	this.Val = value
 }
 
-func UnWriteBlock(sudoku *Sudoku, row, col int) {
-
-	sudoku[row][col].Val = 0
-}
-
 func WriteBlock2(sudoku Sudoku, block, value int) Sudoku {
 	row, col := block/9, block%9
 	if sudoku[row][col].Val != 0 || (sudoku[row][col].Val == 0 && !sudoku[row][col].CanWrite(value)) {
@@ -115,6 +137,11 @@ func WriteBlock2(sudoku Sudoku, block, value int) Sudoku {
 	sudoku[row][col].Val = value
 	sudoku[row][col].Possible = []int{}
 	return sudoku
+}
+
+func UnWriteBlock(sudoku *Sudoku, row, col int) {
+
+	sudoku[row][col].Val = 0
 }
 
 func IsSolved(sudoku Sudoku) bool {
