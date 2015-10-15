@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"sync"
-	"time"
 )
 
 type Fetcher interface {
@@ -14,17 +13,18 @@ type Fetcher interface {
 
 var m sync.Mutex
 var url_list = []string{}
+var wg sync.WaitGroup
 
-func filter(urls *[]string, url_list []string) {
+func Fetched(url string, url_list *[]string) bool {
 	m.Lock()
-	for _, u2 := range url_list {
-		for i, u1 := range *urls {
-			if u1 == u2 {
-				*urls = append((*urls)[:i], (*urls)[i+1:]...)
-			}
+	defer m.Unlock()
+	for _, u := range *url_list {
+		if url == u {
+			return true
 		}
 	}
-	defer m.Unlock()
+	*url_list = append(*url_list, url)
+	return false
 }
 
 // Crawl uses fetcher to recursively crawl
@@ -33,13 +33,11 @@ func Crawl(url string, depth int, fetcher Fetcher) {
 	// TODO: Fetch URLs in parallel.
 	// TODO: Don't fetch the same URL twice.
 	// This implementation doesn't do either:
+	defer wg.Done()
 	if depth <= 0 {
 		return
 	}
 	body, urls, err := fetcher.Fetch(url)
-
-	url_list = append(url_list, url)
-
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -47,25 +45,22 @@ func Crawl(url string, depth int, fetcher Fetcher) {
 	fmt.Printf("found: %s %q\n", url, body)
 
 	for _, u := range urls {
-		fetched := false
-		for _, u2 := range url_list {
-			if u == u2 {
-				fetched = true
-				break
-			}
-		}
-		if !fetched {
+
+		if !Fetched(u, &url_list) {
+			wg.Add(1)
 			go Crawl(u, depth-1, fetcher)
 		}
+
 	}
 	return
 }
 
 func main() {
-
-	go Crawl("http://golang.org/", 4, fetcher)
-	time.Sleep(time.Second * 2)
-	fmt.Println(url_list)
+	url := "http://golang.org/"
+	url_list = append(url_list, url)
+	wg.Add(1)
+	Crawl(url, 4, fetcher)
+	wg.Wait()
 }
 
 // fakeFetcher is Fetcher that returns canned results.
