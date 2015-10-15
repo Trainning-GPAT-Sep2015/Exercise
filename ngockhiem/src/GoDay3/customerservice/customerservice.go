@@ -10,6 +10,7 @@ import (
 var (
 	wg      sync.WaitGroup
 	m       sync.Mutex
+	c       sync.Mutex
 	clock   int              = 0
 	workers map[*Worker]bool = make(map[*Worker]bool)
 )
@@ -31,6 +32,7 @@ func Handle(ch chan Request, exit chan bool) {
 			wg.Add(1)
 			go HandleCustomerReq(rq)
 		case <-exit:
+			close(ch)
 			return
 		}
 	}
@@ -49,29 +51,50 @@ func HandleCustomerReq(rq Request) {
 	m.Lock()
 	for {
 		for worker, available := range workers {
-			if available == true {
+			if available == true && worker.available_at <= clock {
 				current_clock := clock
 				fmt.Printf("Worker %v handle request %v(require %v),clock = %v \n", worker.name, rq.name, rq.time, current_clock)
 				workers[worker] = false
 				worker.available_at = worker.available_at + rq.time
 				m.Unlock()
-				time.Sleep(time.Second * time.Duration(rq.time))
-				fmt.Printf("Worker %v finished request %v,clock = %v \n", worker.name, rq.name, current_clock+rq.time)
-				if current_clock+rq.time >= clock {
-					clock = current_clock + rq.time
+				for {
+					if current_clock+rq.time <= clock {
+						//time.Sleep(time.Second * time.Duration(rq.time))
+						fmt.Printf("Worker %v finished request %v,clock = %v \n", worker.name, rq.name, current_clock+rq.time)
+						// if current_clock+rq.time >= clock {
+						// 	clock = current_clock + rq.time
+						// }
+						ModifyClock(current_clock, rq.time)
+						workers[worker] = true
+						return
+					}
 				}
-				workers[worker] = true
-				return
 			}
 		}
 	}
 }
 
-func ModifyClock(time int) {
-	m.Lock()
-	defer m.Unlock()
-	if clock+time > clock {
-		clock = clock + time
+func ModifyClock(curr_clock, time int) {
+	c.Lock()
+	defer c.Unlock()
+	if curr_clock+time > clock {
+		clock = curr_clock + time
+	}
+}
+
+func IncreaseClock() {
+	for {
+		can_support := false
+		for _, available := range workers {
+			if available == true {
+				can_support = true
+			}
+		}
+		if !can_support {
+			clock++
+			fmt.Println("Increase Tick")
+			time.Sleep(time.Second)
+		}
 	}
 }
 
@@ -89,7 +112,7 @@ func main() {
 
 	go AddRequest(request_list, request_chan, exit_chan)
 	go Handle(request_chan, exit_chan)
-
+	go IncreaseClock()
 	wg.Wait()
 
 	fmt.Println("Current clock = ", clock)
