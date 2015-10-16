@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 	// "flag"
 	//"io"
-	//"fmt"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"net/http"
@@ -49,8 +49,13 @@ func main() {
 	}
 	for i, c := range testcases {
 		tempFileName := "news_" + strconv.Itoa(i) + ".xml"
-		go crawl(c.url, tempFileName)
+		fmt.Println("Go routine ", i+1)
+		ch := make(chan int)
+		ch <- 1
+		go crawl(c.url, tempFileName, ch)
 	}
+
+	//time.Sleep(time.Second * 2)
 
 	// r := rss2{}
 	// xmlContent, _ := ioutil.ReadFile("test.xml")
@@ -63,7 +68,7 @@ func main() {
 	// }
 }
 
-func crawl(uri string, tempFileName string) {
+func crawl(uri string, tempFileName string, ch chan int) {
 	resp, err := http.Get(uri)
 	if err != nil {
 		return
@@ -72,6 +77,7 @@ func crawl(uri string, tempFileName string) {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 	writeToXML(tempFileName, string(body))
+	<-ch
 }
 
 func writeToXML(filename string, source string) {
