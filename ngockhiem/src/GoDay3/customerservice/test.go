@@ -32,6 +32,21 @@ func Handle(ch chan Request, exit chan bool) {
 		select {
 		case rq := <-ch:
 			wg.Add(1)
+			for {
+				found := false
+				for worker, available := range workers {
+					if available == true {
+						workers[worker] = false
+						go StartConversation(worker, rq)
+						found = true
+						break
+					}
+
+				}
+				if found {
+					break
+				}
+			}
 			go HandleCustomerReq(rq)
 		case <-exit:
 			close(exit)
@@ -42,35 +57,46 @@ func Handle(ch chan Request, exit chan bool) {
 
 func AddRequest(request_list []Request, request_chan chan<- Request, exit_chan chan<- bool) {
 	for _, rq := range request_list {
-
-		fmt.Printf("%v, Add request %v(require %v) \n", clock, rq.name, rq.require)
+		fmt.Printf("Request %v appear, clock = %v \n", rq.name, clock)
 		request_chan <- rq
-		time.Sleep(time.Second)
 
 	}
 	time.Sleep(100 * time.Millisecond)
 	exit_chan <- true
 }
-
+func StartConversation(worker *Worker, rq Request) {
+	defer wg.Done()
+	current_clock := clock
+	fmt.Printf("Worker %v handle request %v(require %v),clock = %v \n", worker.name, rq.name, rq.require, current_clock)
+	for {
+		if current_clock+rq.require != clock {
+			//time.Sleep(time.Second * time.Duration(rq.require))
+			fmt.Printf("Worker %v finished request %v,clock = %v \n", worker.name, rq.name, current_clock+rq.require)
+			workers[worker] = true
+			return
+		}
+	}
+}
 func HandleCustomerReq(rq Request) {
 	defer wg.Done()
 	m.Lock()
 	for {
 		for worker, available := range workers {
+
 			if available == true && worker.available_at <= clock {
 				current_clock := clock
-				fmt.Printf("%v, Start converstion: %v - %v \n", clock, worker.name, rq.name)
+				fmt.Printf("Worker %v handle request %v(require %v),clock = %v \n", worker.name, rq.name, rq.require, current_clock)
 				workers[worker] = false
 				worker.available_at = worker.available_at + rq.require
 				m.Unlock()
-				for {
+				for clock != current_clock+rq.require {
 					if current_clock+rq.require <= clock {
 						//time.Sleep(time.Second * time.Duration(rq.require))
-						fmt.Printf("%v, End conversation: %v - %v \n", current_clock+rq.require, worker.name, rq.name)
+						fmt.Printf("Worker %v finished request %v,clock = %v \n", worker.name, rq.name, current_clock+rq.require)
 						// if current_clock+rq.require >= clock {
 						// 	clock = current_clock + rq.require
 						// }
-						ModifyClock(current_clock, rq.require)
+
 						workers[worker] = true
 						return
 					}
