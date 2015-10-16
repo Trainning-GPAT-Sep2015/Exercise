@@ -1,7 +1,7 @@
 package sudoku_test
 
 import (
-	"GoTraining/ngockhiem/GoWeek2/sudoku"
+	"GoDay2/sudoku"
 	"sort"
 	"testing"
 )
@@ -74,14 +74,6 @@ func TestUnique(t *testing.T) {
 		if sample.Possible[i] != e {
 			t.Errorf("Wrong Calculation, expect %v, but got %v", expect, sample)
 		}
-	}
-}
-
-func BenchmarkUnique(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		sample := sudoku.Block{Val: 0, Possible: []int{6, 9, 8, 7, 1}}
-		have := []int{5, 6, 9, 8}
-		sample.Unique(have)
 	}
 }
 
@@ -239,5 +231,19 @@ func BenchmarkGetSolutions(b *testing.B) {
 		var solution_list []sudoku.Sudoku
 		sample_sudoku := sudoku.InitSudoku(sample_board)
 		sudoku.GetSolutions(&sample_sudoku, &solution_list)
+	}
+}
+
+func BenchmarkUnique(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		sample := sudoku.Block{Val: 0, Possible: []int{6, 9, 8, 7, 1}}
+		have := []int{5, 6, 9, 8}
+		sample.Unique(have)
+	}
+}
+
+func BenchmarkGenerate(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		sudoku.GenerateSudoku()
 	}
 }
