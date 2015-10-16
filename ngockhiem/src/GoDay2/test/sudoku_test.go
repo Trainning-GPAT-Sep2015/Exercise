@@ -1,7 +1,7 @@
 package sudoku_test
 
 import (
-	"GoTraining/ngockhiem/GoWeek2/sudoku"
+	"GoDay2/sudoku"
 	"sort"
 	"testing"
 )
