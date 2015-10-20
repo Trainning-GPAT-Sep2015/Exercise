@@ -13,7 +13,7 @@ import (
 	"github.com/russross/blackfriday"
 )
 
-var flArticleDir = flag.String("dir", "", "Aticle directory")
+var flArticleDir = flag.String("dir", "", "Article directory")
 
 type Article struct {
 	path string
@@ -87,8 +87,24 @@ func loadAllArticles(root string) ([]Article, error) {
 	return articles, err
 }
 
+func usage() {
+	fmt.Println(`
+Sample personal blog. Serves markdown content as HTML.
+
+Usage:
+  blog -dir=src/blog
+`)
+}
+
 func main() {
+	flag.Usage = usage
 	flag.Parse()
+	if *flArticleDir == "" {
+		flag.Usage()
+		os.Exit(1)
+		return
+	}
+
 	articles, err := loadAllArticles(*flArticleDir)
 	if err != nil {
 		log.Fatalln("Error reading articles", err)
@@ -99,5 +115,6 @@ func main() {
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/article/", articleHandler)
 
+	log.Println("Server is listening at http://localhost:8080")
 	log.Fatalln(http.ListenAndServe(":8080", nil))
 }
