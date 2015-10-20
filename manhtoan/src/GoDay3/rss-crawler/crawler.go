@@ -49,13 +49,10 @@ func main() {
 	}
 	for i, c := range testcases {
 		tempFileName := "news_" + strconv.Itoa(i) + ".xml"
-		fmt.Println("Go routine ", i+1)
 		ch := make(chan int)
-		ch <- 1
 		go crawl(c.url, tempFileName, ch)
+		ch <- 1
 	}
-
-	//time.Sleep(time.Second * 2)
 
 	// r := rss2{}
 	// xmlContent, _ := ioutil.ReadFile("test.xml")
@@ -69,12 +66,12 @@ func main() {
 }
 
 func crawl(uri string, tempFileName string, ch chan int) {
+	fmt.Println("Starting crawling ... ")
 	resp, err := http.Get(uri)
 	if err != nil {
 		return
 	}
 	defer resp.Body.Close()
-
 	body, _ := ioutil.ReadAll(resp.Body)
 	writeToXML(tempFileName, string(body))
 	<-ch

@@ -2,19 +2,32 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 )
 
-func say(s string) {
-	for i := 0; i < 5; i++ {
-		time.Sleep(1000 * time.Millisecond)
-		fmt.Println(s)
+func makeCakeAndSend(cs chan string) {
+	for i := 1; i <= 3; i++ {
+		cakeName := "Strawberry Cake " + strconv.Itoa(i)
+		fmt.Println("Making a cake and sending ...", cakeName)
+		cs <- cakeName //send a strawberry cake
+		fmt.Println("Actual sending")
+	}
+}
+
+func receiveCakeAndPack(cs chan string) {
+	for i := 1; i <= 3; i++ {
+		fmt.Println("Before receiving")
+		s := <-cs //get whatever cake is on the channel
+		fmt.Println("Packing received cake: ", s)
 	}
 }
 
 func main() {
-	go say("world")
-	//say("hello")
-	var input string
-	fmt.Scanln(&input)
+	cs := make(chan string)
+	go makeCakeAndSend(cs)
+	go receiveCakeAndPack(cs)
+
+	//sleep for a while so that the program doesn’t exit immediately
+	time.Sleep(4 * 1e9)
 }
