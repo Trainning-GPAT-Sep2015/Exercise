@@ -2,7 +2,7 @@ package main
 
 import (
 	//"encoding/json"
-	//"errors"
+	// "errors"
 	"fmt"
 	"io/ioutil"
 )
@@ -14,21 +14,24 @@ type Blog struct {
 	FileName string `json: "filename"`
 }
 
-func showAllArticle(path string) []string {
+func showAllArticle(path string) ([]string, error) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
-		fmt.Println(err)
-		return nil
+		return nil, err
 	}
 	var list_file_name []string
 	for _, f := range files {
 		list_file_name = append(list_file_name, f.Name())
 	}
-	return list_file_name
+	return list_file_name, nil
+}
+
+func readArticle(filename string) {
+
 }
 
 func main() {
-	l := showAllArticle("../data")
+	l, _ := showAllArticle("../data")
 	for _, v := range l {
 		fmt.Println(v)
 	}
