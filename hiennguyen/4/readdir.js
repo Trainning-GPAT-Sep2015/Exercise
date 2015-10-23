@@ -22,13 +22,18 @@ function promisify(fn){
 
 var readdirPromise=promisify(fs.readdir);
 var readfilePromise=promisify(fs.readFile);
+
 readdirPromise(path).then(
 	(result)=>{
+		var count=0;
 		for (var file of result){
 			file=path+"/"+file;
 			readfilePromise(file,'utf-8').then(
-				(file_result)=>{
-					const obj={'original':file_result,'hashed':crypto.createHash('md5').update(file_result).digest('hex')};
+				(file_result)=>{	
+					const obj={
+						'original':file_result,
+						'hashed':crypto.createHash('md5').update(file_result).digest('hex')
+					};
 					console.log(obj.original,'|',obj.hashed);
 				},
 				(file_error)=>console.log(file_error));
