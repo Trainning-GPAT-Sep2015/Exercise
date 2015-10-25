@@ -1,0 +1,11 @@
+{
+    "server": {
+        "addr": "localhost",
+        "port": "3000",
+        "path": {
+            "database": "./md_file",
+            "views": "./views",
+            "public": "./public"
+        }
+    }
+}

@@ -1,0 +1,16 @@
+.header
+  h1= title
+  p
+.body
+    form(action='http://localhost:3000/login', method='post')
+        div
+            input(id='user_id',type='text',value='',placeholder='User ID',name='user[id]')
+        div
+            input(id='pwd', type='password', value='', placeholder='Password', name='user[pwd]')
+        div
+            input(type='submit', value='Log In')
+
+.footer
+    h3 Footer
+    div Designed by:
+        a(href="http://facebook.com/#{author.facebook}" target="_blank")= author.name

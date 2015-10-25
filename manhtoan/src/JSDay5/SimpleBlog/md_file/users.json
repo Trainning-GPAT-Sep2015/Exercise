@@ -1,0 +1,17 @@
+{
+    "user1": {
+        "name": "manhtoan",
+        "pwd": "",
+        "description": "student"
+    },
+    "user2": {
+        "name": "hoang",
+        "pwd": "",
+        "description": "TA"
+    },
+    "user3": {
+        "name": "hang",
+        "pwd": "",
+        "description": "student"
+    }
+}

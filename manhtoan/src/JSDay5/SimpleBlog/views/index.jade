@@ -1,0 +1,18 @@
+.header
+  h1= title
+  p
+.body
+    if isLogin
+        p Hello #{user.name}
+    else
+        div
+            a(href='http://localhost:3000/login') Login
+    h3= file_title
+    ul
+    each filename, index in files
+        li
+            a(href="http://localhost:3000/articles/#{filename}")= filename
+.footer
+    h3 Footer
+    div Designed by:
+        a(href="http://facebook.com/#{author.facebook}", target="_blank")= author.name
