@@ -1,0 +1,5 @@
+19-10-2015 23:17:05 prefix [level3] msg
+19-10-2015 23:17:11 prefix [level3] msg
+19-10-2015 23:17:12 prefix [level3] msg
+19-10-2015 23:17:13 prefix [level3] msg
+20-10-2015 16:48:44 prefix [level] msg
