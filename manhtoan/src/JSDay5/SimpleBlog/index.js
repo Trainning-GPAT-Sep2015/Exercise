@@ -96,6 +96,10 @@ controller.get('/articles/:name', function(req, res) {
     });
 });
 
+controller.route('/dd')
+    .get()
+    .post()
+
 controller.get('/login',function(req, res) {
     var loginPage = 'loginform.jade';
     var loginData = {
@@ -107,7 +111,7 @@ controller.get('/login',function(req, res) {
     };
     var absTempPath = path.join(config.server.path.views, loginPage);
     fs.readFile(absTempPath, 'utf8', function(err, content) {
-        if (err) {
+        if (err) {cd
             console.log(err);
             res.status(404).send('404 Not Found');
         }

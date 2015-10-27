@@ -1,0 +1,7 @@
+{
+    "server":
+    {
+        "addr": "localhost",
+        "port": "3000"
+    }
+}
