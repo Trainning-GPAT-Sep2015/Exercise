@@ -126,6 +126,5 @@ func main() {
 	go IncreaseClock()
 	wg.Wait()
 
-	fmt.Println("Current clock = ", clock)
 	fmt.Println("Done")
 }
