@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"GoDay5/blog/context"
+	"blog/context"
 	"fmt"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -12,11 +13,28 @@ import (
 )
 
 type Article struct {
-	Path string
-	Name string
+	Path    string
+	Name    string
+	Content []byte
 }
 
 var Articles []Article
+
+var articleTemplate = `
+	<html>
+
+	<head>
+		<title>{{.Name}}</title>
+	</head>
+
+	<body>
+	<a href="/">Home</a>
+	<b>Content</b>
+	<p>{{.Content}}</p>
+	</body>
+
+	</html>
+`
 
 func LoadArticles(root string) ([]Article, error) {
 	articles := make([]Article, 4)[:0]
@@ -38,7 +56,22 @@ func LoadArticles(root string) ([]Article, error) {
 }
 
 func ArticlesHandler(w http.ResponseWriter, r *http.Request) {
-	name := context.GetContext(r).ByName("name")
+	w.Header().Add("Content-Type", "text/html")
+	ctx := context.GetContext(r)
+	token, err := GetToken(r)
+	if err != nil {
+		w.WriteHeader(401)
+		fmt.Fprintf(w, "Not Authorized")
+		return
+	}
+	if Token(ctx.Token) != token {
+		w.WriteHeader(401)
+		fmt.Fprintf(w, "Not Authorized")
+		return
+	}
+
+	name := ctx.ByName("name")
+	fmt.Println(w.Header().Get("Token"))
 	var article Article
 	for _, a := range Articles {
 		if a.Name == name || a.Name == name+".md" {
@@ -61,8 +94,9 @@ func ArticlesHandler(w http.ResponseWriter, r *http.Request) {
 
 	unsafe := blackfriday.MarkdownCommon(content)
 	html := bluemonday.UGCPolicy().SanitizeBytes(unsafe)
-
+	article.Content = html
+	t := template.Must(template.New("Article").Parse(articleTemplate))
 	w.Header().Add("Content-Type", "text/html")
 	w.WriteHeader(200)
-	w.Write(html)
+	t.Execute(w, article)
 }
