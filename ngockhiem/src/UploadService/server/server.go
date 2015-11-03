@@ -5,6 +5,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
+	"os"
 )
 
 func HandlerAdapter(f func(w http.ResponseWriter, r *http.Request)) httprouter.Handle {
@@ -15,9 +16,18 @@ func HandlerAdapter(f func(w http.ResponseWriter, r *http.Request)) httprouter.H
 }
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println(r)
+
+	file, handler, err := r.FormFile("file")
+	log.Println(handler.Filename)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	f, err := os.OpenFile("./image/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0755)
+	defer file.Close()
+	defer f.Close()
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Write([]byte("http://localhost:4000/image/L.jpg"))
+	w.Write([]byte("http://localhost:4000/image/" + handler.Filename))
 }
 
 func RootHandler(w http.ResponseWriter, r *http.Request) {

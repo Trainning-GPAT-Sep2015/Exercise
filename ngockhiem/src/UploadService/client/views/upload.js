@@ -13,11 +13,13 @@ form.addEventListener("submit", function(e) {
 		if (file.type.match(/image.*/)) {
 			xhr = new XMLHttpRequest();
 			xhr.open("POST", "http://localhost:4000/upload");
-			xhr.send("hello from client");
+			var formData = new FormData();
+			formData.append("file", file);
+			xhr.send(formData);
 			xhr.onprogress = function(e) {
 				if (e.lengthComputable) {
 					var progress = document.getElementById("progress");
-					var percentComplete = (e.loaded / e.total)*100;
+					var percentComplete = (e.loaded / e.total) * 100;
 					progress.innerHTML = percentComplete + "%";
 				} else {
 					console.log("Cant compute");
@@ -25,7 +27,7 @@ form.addEventListener("submit", function(e) {
 			}
 			xhr.onload = function(e) {
 				var img = document.getElementById("img");
-				img.src=this.response;
+				img.src = this.response;
 				img.style.maxWidth = "300px";
 				img.style.maxHeight = "300px";
 				console.log(this.response);
