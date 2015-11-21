@@ -1,0 +1,21 @@
+{
+  "name": "react-draw",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-core": "^5.8.34",
+    "babel-loader": "^5.3.3",
+    "file-loader": "^0.8.4",
+    "webpack": "^1.12.6"
+  },
+  "dependencies": {
+    "react": "^0.14.2",
+    "react-dom": "^0.14.2"
+  }
+}
