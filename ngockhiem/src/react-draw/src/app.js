@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { LINE,RECT, state, mouseDown, mouseUp, mouseMove, clearCanvas } from './store'; 
+import { FREE,LINE,RECT, state, mouseDown, mouseUp, mouseMove, clearCanvas } from './store'; 
 
 var Canvas = React.createClass({
 	getInitialState(){
@@ -27,13 +27,17 @@ var Canvas = React.createClass({
 	clearCanvas(){
 		clearCanvas();
 	},
+	modeFREE(){
+		state.mode = FREE;
+		this.setState({ selected : "FREE" });
+	},
 	modeLINE(){
 		state.mode = LINE;
-		this.setState({ selected : "LINE"});
+		this.setState({ selected : "LINE" });
 	},
 	modeRECT(){
 		state.mode = RECT;
-		this.setState({ selected : "RECT"});
+		this.setState({ selected : "RECT" });
 	},
 	setColor(){
 		state.color = this.refs.color.value;
@@ -44,6 +48,7 @@ var Canvas = React.createClass({
 			<div>
 				<div id="control">
 					<button onClick={this.clearCanvas}>CLEAR</button>
+					<button onClick={this.modeFREE} id={this.state.selected === "FREE" ? "active" : ""} ref="btnF">FREE</button>
 					<button onClick={this.modeLINE} id={this.state.selected === "LINE" ? "active" : ""} ref="btnL">LINE</button>
 					<button onClick={this.modeRECT} id={this.state.selected === "RECT" ? "active" : ""} ref="btnR">RECT</button>
 					<select onChange={this.setColor} ref="color">

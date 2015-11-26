@@ -1,5 +1,6 @@
 export const LINE = "LINE";
 export const RECT = "RECT";
+export const FREE = "FREE";
 const MOUSE_UP = "UP";
 const MOUSE_DOWN = "DOWN";
 export const state = {
@@ -13,7 +14,10 @@ export const state = {
 	LINEcolor:[],
 	RECTstart:[],
 	RECTend:[],
-	RECTcolor:[]
+	RECTcolor:[],
+	FREElist: [],
+	FREE: [],
+	FREEcolor: []
 };
 
 export function mouseDown(x, y) {
@@ -26,6 +30,9 @@ export function mouseDown(x, y) {
 		state.RECTstart.push([x,y]);
 		state.RECTend.push([x,y]);
 		state.RECTcolor.push(state.color);
+	}	else if (state.mode === FREE){
+		state.FREE.push([x,y]);
+		state.FREEcolor.push(state.color);
 	}
 }
 
@@ -37,8 +44,11 @@ export function mouseUp(x, y) {
 		} else if (state.mode === RECT){
 			state.RECTend.pop();
 			state.RECTend.push([x,y]);
+		} else if (state.mode === FREE){
+			state.FREE.push([x,y]);
+			state.FREElist.push(state.FREE);			
+			state.FREE = [];
 		}
-
 		state.mouse = MOUSE_UP;
 	}
 }
@@ -51,6 +61,8 @@ export function mouseMove(x, y) {
 		} else if (state.mode === RECT){
 			state.RECTend.pop();
 			state.RECTend.push([x,y]);
+		} else if (state.mode === FREE){
+			state.FREE.push([x,y]);
 		}
 		draw();
 	}
@@ -63,11 +75,26 @@ export function clearCanvas(){
 	state.RECTstart = [];
 	state.RECTend	 = [];
 	state.RECTcolor = [];
+	state.FREElist = [];
+	state.FREE = [];
+	state.FREEcolor = [];
 	state.context.clearRect(0, 0, state.context.canvas.width, state.context.canvas.height);
 }
 
+function drawFREE() {
+	for ( let i = 0; i < state.FREElist.length; i++) {
+		state.context.beginPath();
+		state.context.moveTo(state.FREElist[i][0][0],state.FREElist[i][0][1]);
+		for ( let j = 1; j<state.FREElist[i].length;j++){
+			state.context.lineTo(state.FREElist[i][j][0],state.FREElist[i][j][1]);
+		}
+		state.context.strokeStyle = state.FREEcolor[i];
+		state.context.stroke();
+	};
+}
+
 function drawLINE() {
-	for ( let i = 0; i <= state.LINEstart.length-1; i++) {
+	for ( let i = 0; i < state.LINEstart.length; i++) {
 		state.context.beginPath();
 		state.context.moveTo(state.LINEstart[i][0],state.LINEstart[i][1]);
 		state.context.lineTo(state.LINEend[i][0],state.LINEend[i][1]);
@@ -86,8 +113,23 @@ function drawRECT(){
 }
 
 function draw(){
+	if (state.mode === FREE) {
+		state.context.clearRect(0, 0, state.context.canvas.width, state.context.canvas.height);
+		drawFREE();
+		drawLINE();
+		drawRECT();
+
+		state.context.beginPath();
+		state.context.moveTo(state.FREE[0][0], state.FREE[0][1]);
+		for ( let i = 1; i<state.FREE.length;i++){
+			state.context.lineTo(state.FREE[i][0], state.FREE[i][1]);
+		}
+		state.context.strokeStyle = state.FREEcolor[state.FREEcolor.length - 1];
+		state.context.stroke();
+	}
 	if (state.mode === LINE) {
 		state.context.clearRect(0, 0, state.context.canvas.width, state.context.canvas.height);
+		drawFREE();
 		drawLINE();
 		drawRECT();
 
@@ -99,6 +141,7 @@ function draw(){
 	}
 	if (state.mode === RECT) {
 		state.context.clearRect(0, 0, state.context.canvas.width, state.context.canvas.height);
+		drawFREE();
 		drawLINE();
 		drawRECT();
 
