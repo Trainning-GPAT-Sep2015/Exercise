@@ -62,14 +62,16 @@
 		displayName: 'Canvas',
 
 		getInitialState: function getInitialState() {
-			return {};
+			return { selected: "LINE" };
 		},
 		mouseMove: function mouseMove(e) {
 			(0, _store.mouseMove)(e.pageX - this.refs.canvas.offsetLeft, e.pageY - this.refs.canvas.offsetTop);
+			this.setState({ x: e.pageX, y: e.pageY });
 		},
 		componentDidMount: function componentDidMount() {
 			_store.state.context = this.refs.canvas.getContext("2d");
-			console.log(this.refs.canvas.offsetLeft);
+			this.refs.canvas.width = window.innerWidth - this.refs.canvas.offsetLeft;
+			this.refs.canvas.height = window.innerHeight - this.refs.canvas.offsetTop;
 		},
 		mouseDown: function mouseDown(e) {
 			(0, _store.mouseDown)(e.pageX - this.refs.canvas.offsetLeft, e.pageY - this.refs.canvas.offsetTop);
@@ -77,17 +79,19 @@
 		mouseUp: function mouseUp(e) {
 			(0, _store.mouseUp)(e.pageX - this.refs.canvas.offsetLeft, e.pageY - this.refs.canvas.offsetTop);
 		},
-		mouseLeave: function mouseLeave() {
-			// console.log("mouse leave");
+		mouseLeave: function mouseLeave(e) {
+			(0, _store.mouseUp)(e.pageX - this.refs.canvas.offsetLeft, e.pageY - this.refs.canvas.offsetTop);
 		},
 		clearCanvas: function clearCanvas() {
 			(0, _store.clearCanvas)();
 		},
 		modeLINE: function modeLINE() {
 			_store.state.mode = _store.LINE;
+			this.setState({ selected: "LINE" });
 		},
 		modeRECT: function modeRECT() {
 			_store.state.mode = _store.RECT;
+			this.setState({ selected: "RECT" });
 		},
 		setColor: function setColor() {
 			_store.state.color = this.refs.color.value;
@@ -98,35 +102,49 @@
 				'div',
 				null,
 				_react2['default'].createElement(
-					'button',
-					{ onClick: this.clearCanvas },
-					'CLEAR'
-				),
-				_react2['default'].createElement(
-					'button',
-					{ onClick: this.modeLINE },
-					'LINE'
-				),
-				_react2['default'].createElement(
-					'button',
-					{ onClick: this.modeRECT },
-					'RECT'
-				),
-				_react2['default'].createElement(
-					'select',
-					{ onChange: this.setColor, ref: 'color' },
-					_store.state.listColor.map(function (c) {
-						return _react2['default'].createElement(
-							'option',
-							{ value: c },
-							c.toUpperCase()
-						);
-					})
+					'div',
+					{ id: 'control' },
+					_react2['default'].createElement(
+						'button',
+						{ onClick: this.clearCanvas },
+						'CLEAR'
+					),
+					_react2['default'].createElement(
+						'button',
+						{ onClick: this.modeLINE, id: this.state.selected === "LINE" ? "active" : "", ref: 'btnL' },
+						'LINE'
+					),
+					_react2['default'].createElement(
+						'button',
+						{ onClick: this.modeRECT, id: this.state.selected === "RECT" ? "active" : "", ref: 'btnR' },
+						'RECT'
+					),
+					_react2['default'].createElement(
+						'select',
+						{ onChange: this.setColor, ref: 'color' },
+						_store.state.listColor.map(function (c) {
+							return _react2['default'].createElement(
+								'option',
+								{ key: c, value: c },
+								c.toUpperCase()
+							);
+						})
+					),
+					_react2['default'].createElement(
+						'span',
+						{ ref: 'coor' },
+						' X: ',
+						this.state.x,
+						',Y: ',
+						this.state.y
+					)
 				),
 				_react2['default'].createElement(
 					'div',
 					null,
-					_react2['default'].createElement('canvas', { ref: 'canvas', onMouseLeave: this.mouseLeave, onMouseMove: this.mouseMove, onMouseDown: this.mouseDown, onMouseUp: this.mouseUp, style: { border: "1px solid black", width: "500", height: "250" } })
+					_react2['default'].createElement('canvas', { id: 'canvas', ref: 'canvas', onMouseLeave: this.mouseLeave, onMouseMove: this.mouseMove,
+						onMouseDown: this.mouseDown, onMouseUp: this.mouseUp, style: { border: "1px solid black" }
+					})
 				)
 			);
 		}
@@ -183,7 +201,6 @@
 	});
 
 	React.__SECRET_DOM_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = ReactDOM;
-	React.__SECRET_DOM_SERVER_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = ReactDOMServer;
 
 	module.exports = React;
 
@@ -10534,7 +10551,6 @@
 	    multiple: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
 	    muted: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
 	    name: null,
-	    nonce: MUST_USE_ATTRIBUTE,
 	    noValidate: HAS_BOOLEAN_VALUE,
 	    open: HAS_BOOLEAN_VALUE,
 	    optimum: null,
@@ -10546,7 +10562,6 @@
 	    readOnly: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
 	    rel: null,
 	    required: HAS_BOOLEAN_VALUE,
-	    reversed: HAS_BOOLEAN_VALUE,
 	    role: MUST_USE_ATTRIBUTE,
 	    rows: MUST_USE_ATTRIBUTE | HAS_POSITIVE_NUMERIC_VALUE,
 	    rowSpan: null,
@@ -18749,7 +18764,7 @@
 
 	'use strict';
 
-	module.exports = '0.14.3';
+	module.exports = '0.14.2';
 
 /***/ },
 /* 147 */
@@ -19743,110 +19758,110 @@
 		context: null,
 		listColor: ["black", "red", "purple", "green", "pink", "yellow", "blue"],
 		color: "black",
-		pointColor: [],
 		mouse: MOUSE_UP,
 		mode: LINE,
-		pointMode: [],
-		startX: [],
-		startY: [],
-		endX: [],
-		endY: [],
-		current: -1
+		LINEstart: [],
+		LINEend: [],
+		LINEcolor: [],
+		RECTstart: [],
+		RECTend: [],
+		RECTcolor: []
 	};
 
 	exports.state = state;
 
 	function mouseDown(x, y) {
 		state.mouse = MOUSE_DOWN;
-		state.current++;
-		state.pointMode[state.current] = state.mode;
-		state.pointColor[state.current] = state.color;
-		state.startX[state.current] = x;
-		state.startY[state.current] = y;
+		if (state.mode === LINE) {
+			state.LINEstart.push([x, y]);
+			state.LINEend.push([x, y]);
+			state.LINEcolor.push(state.color);
+		} else if (state.mode === RECT) {
+			state.RECTstart.push([x, y]);
+			state.RECTend.push([x, y]);
+			state.RECTcolor.push(state.color);
+		}
 	}
 
 	function mouseUp(x, y) {
 		if (state.mouse === MOUSE_DOWN) {
-			state.endX[state.current] = x;
-			state.endY[state.current] = y;
+			if (state.mode === LINE) {
+				state.LINEend.pop();
+				state.LINEend.push([x, y]);
+			} else if (state.mode === RECT) {
+				state.RECTend.pop();
+				state.RECTend.push([x, y]);
+			}
+
 			state.mouse = MOUSE_UP;
 		}
 	}
 
 	function mouseMove(x, y) {
 		if (state.mouse === MOUSE_DOWN) {
-			state.endX[state.current] = x;
-			state.endY[state.current] = y;
+			if (state.mode === LINE) {
+				state.LINEend.pop();
+				state.LINEend.push([x, y]);
+			} else if (state.mode === RECT) {
+				state.RECTend.pop();
+				state.RECTend.push([x, y]);
+			}
 			draw();
 		}
 	}
 
 	function clearCanvas() {
-		state.startX = [];
-		state.startY = [];
-		state.endX = [];
-		state.endY = [];
-		state.current = -1;
+		state.LINEstart = [];
+		state.LINEend = [];
+		state.LINEcolor = [];
+		state.RECTstart = [];
+		state.RECTend = [];
+		state.RECTcolor = [];
 		state.context.clearRect(0, 0, state.context.canvas.width, state.context.canvas.height);
 	}
 
+	function drawLINE() {
+		for (var i = 0; i <= state.LINEstart.length - 1; i++) {
+			state.context.beginPath();
+			state.context.moveTo(state.LINEstart[i][0], state.LINEstart[i][1]);
+			state.context.lineTo(state.LINEend[i][0], state.LINEend[i][1]);
+			state.context.strokeStyle = state.LINEcolor[i];
+			state.context.stroke();
+		};
+	}
+
+	function drawRECT() {
+		for (var i = 0; i <= state.RECTstart.length - 1; i++) {
+			state.context.beginPath();
+			state.context.rect(state.RECTstart[i][0], state.RECTstart[i][1], state.RECTend[i][0] - state.RECTstart[i][0], state.RECTend[i][1] - state.RECTstart[i][1]);
+			state.context.strokeStyle = state.RECTcolor[i];
+			state.context.stroke();
+		};
+	}
+
 	function draw() {
-		console.log(state.pointMode);
 		if (state.mode === LINE) {
 			state.context.clearRect(0, 0, state.context.canvas.width, state.context.canvas.height);
-			for (var i = 0; i <= state.current; i++) {
-				state.context.beginPath();
-				if (state.pointMode[i] === LINE) {
-					state.context.moveTo(state.startX[i] / 1.65, state.startY[i] / 1.65);
-					state.context.lineTo(state.endX[i] / 1.65, state.endY[i] / 1.65);
-				} else {
-					state.context.rect(state.startX[i] / 1.65, state.startY[i] / 1.65, state.endX[i] / 1.65 - state.startX[i] / 1.65, state.endY[i] / 1.65 - state.startY[i] / 1.65);
-				}
-				state.context.strokeStyle = state.pointColor[i];
-				state.context.stroke();
-			}
+			drawLINE();
+			drawRECT();
+
 			state.context.beginPath();
-			state.context.moveTo(state.startX[state.current] / 1.65, state.startY[state.current] / 1.65);
-			state.context.lineTo(state.endX[state.current] / 1.65, state.endY[state.current] / 1.65);
-			state.context.strokeStyle = state.pointColor[state.current];
+			state.context.moveTo(state.LINEstart[state.LINEstart.length - 1][0], state.LINEstart[state.LINEstart.length - 1][1]);
+			state.context.lineTo(state.LINEend[state.LINEend.length - 1][0], state.LINEend[state.LINEend.length - 1][1]);
+			state.context.strokeStyle = state.LINEcolor[state.LINEstart.length - 1];
 			state.context.stroke();
 		}
-		// console.log("--------------------------------------------------")
-		// for (let i=0;i<=state.current;i++){
-		// 	console.log("("+state.startX[i]+","+state.startY[i]+")" +" "+ "("+state.endX[i]+","+state.endY[i]+")");
-		// }
 		if (state.mode === RECT) {
 			state.context.clearRect(0, 0, state.context.canvas.width, state.context.canvas.height);
-			for (var i = 0; i <= state.current; i++) {
-				state.context.beginPath();
-				if (state.pointMode[i] === LINE) {
-					state.context.moveTo(state.startX[i] / 1.65, state.startY[i] / 1.65);
-					state.context.lineTo(state.endX[i] / 1.65, state.endY[i] / 1.65);
-				} else {
-					state.context.rect(state.startX[i] / 1.65, state.startY[i] / 1.65, state.endX[i] / 1.65 - state.startX[i] / 1.65, state.endY[i] / 1.65 - state.startY[i] / 1.65);
-				}
-				state.context.strokeStyle = state.pointColor[i];
-				state.context.stroke();
-			}
+			drawLINE();
+			drawRECT();
+
+			var last = state.RECTstart.length - 1;
 			state.context.beginPath();
-			state.context.rect(state.startX[state.current] / 1.65, state.startY[state.current] / 1.65, state.endX[state.current] / 1.65 - state.startX[state.current] / 1.65, state.endY[state.current] / 1.65 - state.startY[state.current] / 1.65);
-			state.context.strokeStyle = state.pointColor[state.current];
+			state.context.rect(state.RECTstart[last][0], state.RECTstart[last][1], state.RECTend[last][0] - state.RECTstart[last][0], state.RECTend[last][1] - state.RECTstart[last][1]);
+			state.context.strokeStyle = state.RECTcolor[last];
 			state.context.stroke();
 		}
-	}
-
-	function drawLINE(index) {
-		state.context.beginPath();
-		state.context.moveTo(state.startX[index] / 1.65, state.startY[index] / 1.65);
-		state.context.lineTo(state.endX[index] / 1.65, state.endY[index] / 1.65);
-		state.context.strokeStyle = state.pointColor[index];
-		state.context.stroke();
-	}
-
-	function drawRECT(index) {
-		state.context.rect(state.startX[index] / 1.65, state.startY[index] / 1.65, state.endX[index] / 1.65 - state.startX[index] / 1.65, state.endY[index] / 1.65 - state.startY[index] / 1.65);
-		state.context.strokeStyle = state.pointColor[index];
-		state.context.stroke();
 	}
 
 /***/ }

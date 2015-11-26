@@ -4,14 +4,16 @@ import { LINE,RECT, state, mouseDown, mouseUp, mouseMove, clearCanvas } from './
 
 var Canvas = React.createClass({
 	getInitialState(){
-		return {};
+		return { selected: "LINE" };
 	},
 	mouseMove(e){
 		mouseMove(e.pageX - this.refs.canvas.offsetLeft, e.pageY - this.refs.canvas.offsetTop);
+		this.setState({x:e.pageX, y:e.pageY});
 	},
 	componentDidMount(){
 		state.context = this.refs.canvas.getContext("2d");
-		console.log(this.refs.canvas.offsetLeft);
+		this.refs.canvas.width = window.innerWidth - this.refs.canvas.offsetLeft;
+		this.refs.canvas.height = window.innerHeight - this.refs.canvas.offsetTop;
 	},
 	mouseDown(e){
 		mouseDown(e.pageX - this.refs.canvas.offsetLeft, e.pageY - this.refs.canvas.offsetTop);
@@ -19,17 +21,19 @@ var Canvas = React.createClass({
 	mouseUp(e){
 		mouseUp(e.pageX - this.refs.canvas.offsetLeft, e.pageY - this.refs.canvas.offsetTop);
 	},
-	mouseLeave(){
-		// console.log("mouse leave");
+	mouseLeave(e){
+		mouseUp(e.pageX - this.refs.canvas.offsetLeft, e.pageY - this.refs.canvas.offsetTop );
 	},
 	clearCanvas(){
 		clearCanvas();
 	},
 	modeLINE(){
 		state.mode = LINE;
+		this.setState({ selected : "LINE"});
 	},
 	modeRECT(){
 		state.mode = RECT;
+		this.setState({ selected : "RECT"});
 	},
 	setColor(){
 		state.color = this.refs.color.value;
@@ -38,16 +42,22 @@ var Canvas = React.createClass({
 	render(){
 		return (
 			<div>
-				<button onClick={this.clearCanvas}>CLEAR</button>
-				<button onClick={this.modeLINE}>LINE</button>
-				<button onClick={this.modeRECT}>RECT</button>
-				<select onChange={this.setColor} ref="color">
-					{state.listColor.map((c) => <option value={c}>{c.toUpperCase()}</option>)}
-				</select> 				
+				<div id="control">
+					<button onClick={this.clearCanvas}>CLEAR</button>
+					<button onClick={this.modeLINE} id={this.state.selected === "LINE" ? "active" : ""} ref="btnL">LINE</button>
+					<button onClick={this.modeRECT} id={this.state.selected === "RECT" ? "active" : ""} ref="btnR">RECT</button>
+					<select onChange={this.setColor} ref="color">
+						{state.listColor.map((c) => <option key={c} value={c}>{c.toUpperCase()}</option>)}
+					</select> 				
+					<span ref="coor"> X: {this.state.x},Y: {this.state.y}</span>
+				</div>
 				<div>
-					<canvas ref='canvas' onMouseLeave={this.mouseLeave} onMouseMove={this.mouseMove} onMouseDown={this.mouseDown} onMouseUp={this.mouseUp} style={{border: "1px solid black", width:"500", height:"250"}}></canvas>
+					<canvas id="canvas" ref='canvas' onMouseLeave={this.mouseLeave} onMouseMove={this.mouseMove} 
+					onMouseDown={this.mouseDown} onMouseUp={this.mouseUp} style={{border:"1px solid black"}}
+					></canvas>
 				</div>
 			</div>
+
 		);
 	}
 });

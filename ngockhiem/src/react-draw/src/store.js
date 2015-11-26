@@ -6,108 +6,106 @@ export const state = {
 	context: null,
 	listColor: ["black","red","purple","green","pink","yellow","blue"],
 	color: "black",
-	pointColor: [],
 	mouse: MOUSE_UP,
 	mode: LINE,
-	pointMode: [],
-	startX: [],
-	startY: [],
-	endX: [],
-	endY: [],
-	current: -1
+	LINEstart:[],
+	LINEend:[],
+	LINEcolor:[],
+	RECTstart:[],
+	RECTend:[],
+	RECTcolor:[]
 };
 
 export function mouseDown(x, y) {
 	state.mouse = MOUSE_DOWN;
-	state.current++;
-	state.pointMode[state.current] = state.mode;
-	state.pointColor[state.current] = state.color;
-	state.startX[state.current] = x;
-	state.startY[state.current] = y;
+	if (state.mode === LINE){
+		state.LINEstart.push([x,y]);
+		state.LINEend.push([x,y]);
+		state.LINEcolor.push(state.color);
+	} else if (state.mode === RECT){
+		state.RECTstart.push([x,y]);
+		state.RECTend.push([x,y]);
+		state.RECTcolor.push(state.color);
+	}
 }
 
 export function mouseUp(x, y) {
 	if (state.mouse === MOUSE_DOWN) {
-		state.endX[state.current] = x;
-		state.endY[state.current] = y;
+		if (state.mode === LINE){
+			state.LINEend.pop();
+			state.LINEend.push([x,y]);
+		} else if (state.mode === RECT){
+			state.RECTend.pop();
+			state.RECTend.push([x,y]);
+		}
+
 		state.mouse = MOUSE_UP;
 	}
 }
 
 export function mouseMove(x, y) {
 	if (state.mouse === MOUSE_DOWN) {
-		state.endX[state.current] = x;
-		state.endY[state.current] = y;
+		if (state.mode === LINE){
+			state.LINEend.pop();
+			state.LINEend.push([x,y]);
+		} else if (state.mode === RECT){
+			state.RECTend.pop();
+			state.RECTend.push([x,y]);
+		}
 		draw();
 	}
 }
 
 export function clearCanvas(){
-	state.startX = [];
-	state.startY = [];
-	state.endX = [];
-	state.endY = [];
-	state.current = -1;
+	state.LINEstart = [];
+	state.LINEend = [];
+	state.LINEcolor = [];
+	state.RECTstart = [];
+	state.RECTend	 = [];
+	state.RECTcolor = [];
 	state.context.clearRect(0, 0, state.context.canvas.width, state.context.canvas.height);
 }
 
+function drawLINE() {
+	for ( let i = 0; i <= state.LINEstart.length-1; i++) {
+		state.context.beginPath();
+		state.context.moveTo(state.LINEstart[i][0],state.LINEstart[i][1]);
+		state.context.lineTo(state.LINEend[i][0],state.LINEend[i][1]);
+		state.context.strokeStyle = state.LINEcolor[i];
+		state.context.stroke();
+	};
+}
 
-function draw() {
-	console.log(state.pointMode);
+function drawRECT(){
+	for ( let i = 0; i <= state.RECTstart.length-1; i++) {
+		state.context.beginPath();
+		state.context.rect(state.RECTstart[i][0], state.RECTstart[i][1],state.RECTend[i][0] - state.RECTstart[i][0], state.RECTend[i][1] - state.RECTstart[i][1]);
+		state.context.strokeStyle = state.RECTcolor[i];
+		state.context.stroke();
+	};
+}
+
+function draw(){
 	if (state.mode === LINE) {
 		state.context.clearRect(0, 0, state.context.canvas.width, state.context.canvas.height);
-		for (let i = 0; i<=state.current;i++){
-			state.context.beginPath();
-			if (state.pointMode[i] === LINE){
-				state.context.moveTo(state.startX[i] / 1.65, state.startY[i] / 1.65);
-				state.context.lineTo(state.endX[i] / 1.65, state.endY[i] / 1.65);
-			} else {
-				state.context.rect(state.startX[i] / 1.65, state.startY[i] / 1.65,state.endX[i] / 1.65 - state.startX[i] / 1.65, state.endY[i] / 1.65 - state.startY[i] / 1.65);
-			}
-			state.context.strokeStyle = state.pointColor[i];
-			state.context.stroke();
-		}				
+		drawLINE();
+		drawRECT();
+
 		state.context.beginPath();
-		state.context.moveTo(state.startX[state.current] / 1.65, state.startY[state.current] / 1.65);
-		state.context.lineTo(state.endX[state.current] / 1.65, state.endY[state.current] / 1.65);
-		state.context.strokeStyle = state.pointColor[state.current];
+		state.context.moveTo(state.LINEstart[state.LINEstart.length-1][0],state.LINEstart[state.LINEstart.length-1][1]);
+		state.context.lineTo(state.LINEend[state.LINEend.length-1][0],state.LINEend[state.LINEend.length-1][1]);
+		state.context.strokeStyle = state.LINEcolor[state.LINEstart.length-1];
 		state.context.stroke();
 	}
-	// console.log("--------------------------------------------------")
-	// for (let i=0;i<=state.current;i++){
-	// 	console.log("("+state.startX[i]+","+state.startY[i]+")" +" "+ "("+state.endX[i]+","+state.endY[i]+")");
-	// }
 	if (state.mode === RECT) {
 		state.context.clearRect(0, 0, state.context.canvas.width, state.context.canvas.height);
-		for (let i = 0; i<=state.current;i++){
-			state.context.beginPath();
-			if (state.pointMode[i] === LINE){
-				state.context.moveTo(state.startX[i] / 1.65, state.startY[i] / 1.65);
-				state.context.lineTo(state.endX[i] / 1.65, state.endY[i] / 1.65);
-			} else  {
-				state.context.rect(state.startX[i] / 1.65, state.startY[i] / 1.65,state.endX[i] / 1.65 - state.startX[i] / 1.65, state.endY[i] / 1.65 - state.startY[i] / 1.65);
-			}
-			state.context.strokeStyle = state.pointColor[i];
-			state.context.stroke();
-		}				
+		drawLINE();
+		drawRECT();
+
+		const last = state.RECTstart.length - 1;
 		state.context.beginPath();
-		state.context.rect(state.startX[state.current] / 1.65, state.startY[state.current] / 1.65,state.endX[state.current] / 1.65 - state.startX[state.current] / 1.65, state.endY[state.current] / 1.65 - state.startY[state.current] / 1.65);
-		state.context.strokeStyle = state.pointColor[state.current];
+		state.context.rect(state.RECTstart[last][0], state.RECTstart[last][1],state.RECTend[last][0] - state.RECTstart[last][0], state.RECTend[last][1] - state.RECTstart[last][1]);
+		state.context.strokeStyle = state.RECTcolor[last];
 		state.context.stroke();
- 
 	}
-}
-
-function drawLINE(index) {
-	state.context.beginPath();
-	state.context.moveTo(state.startX[index] / 1.65, state.startY[index] / 1.65);
-	state.context.lineTo(state.endX[index] / 1.65, state.endY[index] / 1.65);
-	state.context.strokeStyle = state.pointColor[index];
-	state.context.stroke();
-}
-
-function drawRECT(index){
-	state.context.rect(state.startX[index] / 1.65, state.startY[index] / 1.65,state.endX[index] / 1.65 - state.startX[index] / 1.65, state.endY[index] / 1.65 - state.startY[index] / 1.65);
-	state.context.strokeStyle = state.pointColor[index];
-	state.context.stroke(); 
 }
