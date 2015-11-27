@@ -80,20 +80,16 @@ export default React.createClass({
   draw:function(x1,y1,x2,y2,color,mode){
     var ctx=this.state.ctx;
     ctx.beginPath();
+    ctx.strokeStyle=color;
+    ctx.lineWidth=2;
+    ctx.lineJoin='round';
     if (mode==='line'){
-      ctx.strokeStyle=color;
-      ctx.lineWidth=2;
-      ctx.lineJoin='round';
       ctx.moveTo(x1,y1);
       ctx.lineTo(x2,y2);
-      ctx.stroke();
     } else if (mode==='rec'){
-      ctx.strokeStyle=color;
-      ctx.lineWidth=2;
-      ctx.lineJoin='round';
       ctx.rect(x1,y1,x2-x1,y2-y1);
-      ctx.stroke();
     }
+    ctx.stroke();
   },
   drawAll:function(){
     this.clear();
