@@ -50,18 +50,9 @@ export default React.createClass({
     }
   },
   mouseup:function(e){
-    this.clear();
     this.setState({mousePressed:false});
     const coords=this.state.coords;
     const d=this.refs.canvas;
-    this.draw(
-      this.state.first.x,
-      this.state.first.y,
-      coords[coords.length-1].x,
-      coords[coords.length-1].y,
-      this.props.color,
-      this.props.mode
-      );
     coords.length=0;
     const start=this.state.start;
     start.push({
@@ -100,7 +91,7 @@ export default React.createClass({
     } else if (mode==='rec'){
       ctx.strokeStyle=color;
       ctx.lineWidth=2;
-      ctx.lineJoin=2;
+      ctx.lineJoin='round';
       ctx.rect(x1,y1,x2-x1,y2-y1);
       ctx.stroke();
     }
@@ -123,13 +114,13 @@ export default React.createClass({
     ctx.clearRect(0,0,this.refs.canvas.width,this.refs.canvas.height);
   },
   clearAll:function(){
-    this.clear();
     this.setState({
       start:[],
       end:[],
       colors:[],
       modes:[]
     });
+    this.clear();
   },
   render:function() {
     return <canvas width={1200} height={600} onMouseDown={this.mousedown} onMouseMove={this.mousemove}
