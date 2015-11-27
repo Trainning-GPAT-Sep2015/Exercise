@@ -16,15 +16,14 @@ var App=React.createClass({
     this.setState({color:e.target.value});
   },
   clear:function(){
-    this.refs.canvas.clear();
+    this.refs.canvas.clearAll();
   },
   render:function(){
     return (
-      <div>
         <div>
           <select defaultValue='line' onChange={this.changeMode}>
             <option value='line'>Line</option>
-            <option value='rec'>Rectangular</option>
+            <option value='rec'>Rectangle</option>
           </select>
           <select defaultValue='black' onChange={this.changeColor}>
             <option value='black'>Black</option>
@@ -34,12 +33,9 @@ var App=React.createClass({
             <option value='yellow'>Yellow</option>
           </select>
           <button ref='clear' onClick={this.clear}>Clear</button>
-        </div>
-        <div>
-          <Graphic mode={this.state.mode} color={this.state.color} ref='canvas'/>
-        </div>
-      </div>);
+          <Graphic ref='canvas' color={this.state.color} mode={this.state.mode}/>
+        </div>);
   }
 });
 
-ReactDOM.render(<App />, document.getElementById('app'));
+ReactDOM.render(<App/>,document.getElementById('app'));

@@ -3,11 +3,17 @@ import React from 'react';
 export default React.createClass({
   getInitialState:function(){
     return {
-      firstX:0,
-      firstY:0,
       mousePressed:false,
       ctx:null,
-      coords:[]
+      first:{
+        x:0,
+        y:0
+      },
+      coords:[],
+      start:[],
+      end:[],
+      colors:[],
+      modes:[]
     };
   },
   componentDidMount:function(){
@@ -15,17 +21,26 @@ export default React.createClass({
   },
   mousedown:function(e){
     const d=this.refs.canvas;
-    this.setState({mousePressed:true});
     this.setState({
-      firstX:e.pageX-d.offsetLeft,
-      firstY:e.pageY-d.offsetTop
+      mousePressed:true,
+      first:{
+        x:e.pageX-d.offsetLeft,
+        y:e.pageY-d.offsetTop
+      }
     });
   },
   mousemove:function(e){
     if (this.state.mousePressed){
-      this.clear();
+      this.drawAll();
       const d=this.refs.canvas;
-      this.draw(e.pageX-d.offsetLeft,e.pageY-d.offsetTop);
+      this.draw(
+        this.state.first.x,
+        this.state.first.y,
+        e.pageX-d.offsetLeft,
+        e.pageY-d.offsetTop,
+        this.props.color,
+        this.props.mode
+        );
       const coords=this.state.coords;
       coords.push({
         x:e.pageX-d.offsetLeft,
@@ -39,28 +54,82 @@ export default React.createClass({
     this.setState({mousePressed:false});
     const coords=this.state.coords;
     const d=this.refs.canvas;
-    this.draw(coords[coords.length-1].x,coords[coords.length-1].y);
+    this.draw(
+      this.state.first.x,
+      this.state.first.y,
+      coords[coords.length-1].x,
+      coords[coords.length-1].y,
+      this.props.color,
+      this.props.mode
+      );
     coords.length=0;
-    coords.push({
+    const start=this.state.start;
+    start.push({
+      x:this.state.first.x,
+      y:this.state.first.y
+    });
+    const end=this.state.end;
+    end.push({
         x:e.pageX-d.offsetLeft,
         y:e.pageY-d.offsetTop
       });
-    this.setState({coords:coords});
+    const colors=this.state.colors;
+    colors.push(this.props.color);
+    const modes=this.state.modes;
+    modes.push(this.props.mode);
+    this.setState({
+      coords:coords,
+      start:start,
+      end:end,
+      colors:colors,
+      modes:modes
+    });
+    this.drawAll();
   },
-  draw:function(x,y) {
+  draw:function(x1,y1,x2,y2,color,mode){
     var ctx=this.state.ctx;
-    ctx.beginPath();
-    ctx.strokeStyle=this.props.color;
-    ctx.lineWidth=2;
-    ctx.lineJoin='round';
-    ctx.moveTo(this.state.firstX,this.state.firstY);
-    ctx.lineTo(x,y);
-    ctx.closePath();
-    ctx.stroke();
+    if (mode==='line'){
+      ctx.beginPath();
+      ctx.strokeStyle=color;
+      ctx.lineWidth=2;
+      ctx.lineJoin='round';
+      ctx.moveTo(x1,y1);
+      ctx.lineTo(x2,y2);
+      ctx.closePath();
+      ctx.stroke();
+    } else if (mode==='rec'){
+      ctx.strokeStyle=color;
+      ctx.lineWidth=2;
+      ctx.lineJoin=2;
+      ctx.rect(x1,y1,x2-x1,y2-y1);
+      ctx.stroke();
+    }
+  },
+  drawAll:function(){
+    this.clear();
+    for (let i=0;i<this.state.end.length;i++){
+      this.draw(
+        this.state.start[i].x,
+        this.state.start[i].y,
+        this.state.end[i].x,
+        this.state.end[i].y,
+        this.state.colors[i],
+        this.state.modes[i]
+        );
+    }
   },
   clear:function(){
     var ctx=this.state.ctx;
     ctx.clearRect(0,0,this.refs.canvas.width,this.refs.canvas.height);
+  },
+  clearAll:function(){
+    this.clear();
+    this.setState({
+      start:[],
+      end:[],
+      colors:[],
+      modes:[]
+    });
   },
   render:function() {
     return <canvas width={1200} height={600} onMouseDown={this.mousedown} onMouseMove={this.mousemove}
