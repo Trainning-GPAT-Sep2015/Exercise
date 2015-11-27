@@ -79,14 +79,13 @@ export default React.createClass({
   },
   draw:function(x1,y1,x2,y2,color,mode){
     var ctx=this.state.ctx;
+    ctx.beginPath();
     if (mode==='line'){
-      ctx.beginPath();
       ctx.strokeStyle=color;
       ctx.lineWidth=2;
       ctx.lineJoin='round';
       ctx.moveTo(x1,y1);
       ctx.lineTo(x2,y2);
-      ctx.closePath();
       ctx.stroke();
     } else if (mode==='rec'){
       ctx.strokeStyle=color;
