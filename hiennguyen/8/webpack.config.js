@@ -1,0 +1,25 @@
+module.exports={
+	context: __dirname+'/src',
+	entry:'./draw-app.js',
+	output:{
+		path:__dirname+'/static',
+		filename:'bundle.js'
+	},
+	module:{
+		loaders:[
+		{
+			test:/\.jpg$/,
+			loader:'url?limit=10000'
+		},
+		{
+			test:/\.js$/,
+			exclude:/node-modules/,
+			loader:'babel'
+		},
+		{
+			test:/\.css$/,
+			loader:'style!css'
+		}
+		]
+	}
+}
