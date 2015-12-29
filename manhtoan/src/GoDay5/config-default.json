@@ -3,5 +3,15 @@
     {
         "addr": "localhost",
         "port": "3000"
+    },
+
+    "rethinkdb": {
+        "RETHINKDB_PORT": "28015",
+        "RETHINKDB_ADDR": "127.0.0.1",
+        "RETHINKDB_DBNAME": "simple_blog"
+    },
+
+    "github": {
+        "GITHUB_TOKEN": "empty"
     }
 }

@@ -1,0 +1,17 @@
+r.expr(Array.apply(null, Array(20)).map(function(x, i) { return i; }))
+  .map(function(vak) {
+    return r.expr(['CS', 'CE'])(r.random(0, 2))
+                .add(r.random(0, 4).coerceTo('string'))
+                .add('0')
+                .add(r.random(0, 10).coerceTo('string'))
+  })
+  .distinct()
+  .map(function(val) {
+    return {
+      id: val,
+      name: r.expr('Subject ').add(val)
+    }
+  })
+  .forEach(function(val) {
+    return r.db('test').table('subject').insert(val)
+  })

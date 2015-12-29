@@ -1,0 +1,1 @@
+go install GoDay5/handlers && go install GoDay5/server && go install GoDay5/utils/load-config && go install GoDay5/utils/load-markdown && go install GoDay5/utils/load-dir && go install GoDay5/utils/rethinkdb && go install GoDay5/context && go install GoDay5/middlewares && go install GoDay5/cmd/blog-server

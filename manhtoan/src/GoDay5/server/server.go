@@ -10,6 +10,12 @@ type Config struct {
 		Addr string `json: "addr"`
 		Port string `json: "port"`
 	} `json: "server"`
+
+	RethinkDB struct {
+		Port   string `json:"RETHINKDB_PORT`
+		Addr   string `json:"RETHINKDB_ADDR"`
+		DBName string `json:"RETHINKDB_DBNAME"`
+	} `json:"rethinkdb"`
 }
 
 func Start(cfg Config) {

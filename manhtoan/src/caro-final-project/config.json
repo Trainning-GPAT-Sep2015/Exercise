@@ -1,0 +1,10 @@
+{
+    "server": {
+        "port": "3000"
+    },
+    "rethinkdb": {
+        "host": "localhost",
+        "port": "28015",
+        "db": "caro_db"
+    }
+}
