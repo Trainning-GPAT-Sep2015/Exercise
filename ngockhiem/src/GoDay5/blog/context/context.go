@@ -1,6 +1,7 @@
 package context
 
 import (
+	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
@@ -9,6 +10,7 @@ var ContextMap map[*http.Request]*Context = make(map[*http.Request]*Context)
 
 type Context struct {
 	httprouter.Params
+	Token string
 }
 
 func GetContext(r *http.Request) *Context {
@@ -27,7 +29,9 @@ func ClearContext(r *http.Request) {
 func ContextMiddleWare(h http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			GetContext(r)
+			ctx := GetContext(r)
+			ctx.Token = r.Header.Get("Authentication")
+			fmt.Println(r.Header)
 			h.ServeHTTP(w, r)
 			ClearContext(r)
 		})

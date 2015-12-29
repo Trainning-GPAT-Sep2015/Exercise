@@ -1,17 +1,17 @@
 package main
 
 import (
+	"blog/context"
+	"blog/controller"
+	"blog/middleware"
 	"encoding/json"
+	"flag"
+	"github.com/julienschmidt/httprouter"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
-
-	"GoDay5/blog/context"
-	"GoDay5/blog/controller"
-	"GoDay5/blog/middleware"
-	"github.com/julienschmidt/httprouter"
 )
 
 type Config struct {
@@ -20,12 +20,16 @@ type Config struct {
 	Port     int
 }
 
+var configFlg = flag.String("config", "", "config json path")
+
 var homepage = `
 <html>
 <head>
 <title>Blog</title>
 </head>
 <body>
+<a href="/login">login</a>
+<a href="/login/reset">reset</a>
 <p><b>Welcom to my blog</b></p>
 <ul>
 {{ range .}}
@@ -53,7 +57,6 @@ func loadConfig(path string) (Config, error) {
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/html")
 	w.WriteHeader(200)
-
 	var articleList []string
 	for _, article := range controller.Articles {
 		articleList = append(articleList, article.Name)
@@ -63,7 +66,9 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	config, config_err := loadConfig("./config.json")
+	flag.Parse()
+
+	config, config_err := loadConfig(*configFlg)
 	if config_err != nil {
 		log.Fatalln(config_err)
 	}
@@ -82,10 +87,12 @@ func main() {
 	router := httprouter.New()
 	router.GET("/", httpAdapter(rootHandler))
 	router.GET("/article/:name", httpAdapter(controller.ArticlesHandler))
+	router.GET("/login", httpAdapter(controller.OauthGet))
+	router.GET("/login/reset", httpAdapter(controller.OauthReset))
 
 	finalrouter := middleware.RecoverMiddleWare(middleware.AuthMiddleWare(context.ContextMiddleWare(middleware.LogMiddleWare(router))))
 
-	log.Println("Listen and Serve at", config.Host, ":", config.Port)
-	log.Fatalln(http.ListenAndServe(":"+strconv.Itoa(config.Port), finalrouter))
+	log.Println("Listen and Serve at", config.Host, ":", strconv.Itoa(config.Port))
+	log.Fatalln(http.ListenAndServe(config.Host+":"+strconv.Itoa(config.Port), finalrouter))
 
 }
